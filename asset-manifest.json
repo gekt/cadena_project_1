@@ -1,0 +1,13 @@
+{
+  "files": {
+    "main.css": "/cadena_project_1/static/css/main.341d34cc.css",
+    "main.js": "/cadena_project_1/static/js/main.6063f9d2.js",
+    "index.html": "/cadena_project_1/index.html",
+    "main.341d34cc.css.map": "/cadena_project_1/static/css/main.341d34cc.css.map",
+    "main.6063f9d2.js.map": "/cadena_project_1/static/js/main.6063f9d2.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.341d34cc.css",
+    "static/js/main.6063f9d2.js"
+  ]
+}
