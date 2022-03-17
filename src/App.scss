@@ -1,0 +1,41 @@
+body, html{
+  margin: 0;
+  background-color: #222336;
+}
+
+
+.messageBox{
+  width: 80%;
+  height: 250px;
+  margin: 0 auto;
+  border: 2px solid black;
+  overflow: auto;
+
+  #displayedMessage{
+    color: white;
+  }
+
+
+}
+
+.inputBox{
+  width: 80%;
+  margin: 15px auto;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  input{
+    height: 35px;
+    width: 250px;
+  }
+
+  button {
+    height: 35px;
+  }
+}
+
+p {
+  text-align: center;
+  color: darkorange;
+}
