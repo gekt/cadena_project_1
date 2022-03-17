@@ -5,34 +5,26 @@ import "./App.scss";
 
 export default () => {
 
-    const contractAddress = "0xb41a007f1d186a4c55fbe784a239a0a1ef78770c";
+    const contractAddress = "0x75396df1102b5ed9a658628422bf8ac34d10dbd5";
 
     const [hasWallet, setHasWallet] = useState(false);
     const [account, setAccount] = useState(null);
-    const [allMessages, setAllMessages] = useState([]);
     const [messageText, setMessageText] = useState("");
     const [isOwner, setIsOwner] = useState(null);
     const [ownerAddress, setOwnerAddress] = useState(null);
     const sendMessageInput = useRef();
-    const messageBox = useRef();
-    const [lastMessageReceived, setLastMessageReceived] = useState(null);
-    const [loadingMessage, setLoadingMessage] = useState(true);
+
+    const loadingMessage = useRef(true);
+    const [isLoading, setIsLoading] = useState(true);
+
+    const [displayedMessages,setDisplayedMessages] = useState([]);
+    const allMessages = useRef([]);
 
 
     useEffect(() => {
         if (window.ethereum) {
 
-
-
             connectWallet();
-            getAllMessages();
-            getChatOwner();
-
-            if (account){
-                registerListener();
-            }
-
-
 
             setHasWallet(true);
 
@@ -45,7 +37,6 @@ export default () => {
                 }
             });
 
-
             return () => {
                 const provider = new ethers.providers.Web3Provider(window.ethereum);
                 const signer = provider.getSigner();
@@ -56,7 +47,16 @@ export default () => {
 
         }
 
-    }, [account]);
+    }, []);
+
+    useEffect(() => {
+        if (account){
+            getAllMessages();
+            getChatOwner();
+            registerListener();
+        }
+    }, [account])
+
 
 
     const connectWallet = async () => {
@@ -76,18 +76,15 @@ export default () => {
         const messagesCount = await contract.messageCount();
         let arrMessages = [];
 
-        setAllMessages([]);
+        setLoadingMessages(true);
 
-        setLoadingMessage(true);
         for (let i = 0; i < messagesCount; i++) {
             const data = await contract.getMessage(i);
             arrMessages.push({index: data._index, from: data._from, message: data._message})
         }
 
         setAllMessages(arrMessages);
-        setLoadingMessage(false);
-
-        console.log("count mess", arrMessages.length);
+        setLoadingMessages(false);
     }
 
 
@@ -132,19 +129,38 @@ export default () => {
     }
 
 
-    const registerListener = async () => {
+    const registerListener = () => {
         const provider = new ethers.providers.Web3Provider(window.ethereum);
         const signer = provider.getSigner();
         const contract = new ethers.Contract(contractAddress, abi, signer);
 
-        contract.on("MessageAdded", async (index, from, message) => {
-
-            console.log("New messages")
-
-            getAllMessages();
-
-
+        contract.on("MessageAdded", (index, from, message) => {
+            if (!loadingMessage.current){
+                console.log("ADD NEW MESSAGE")
+                let newData = allMessages.current;
+                newData.push({index,from,message})
+                setAllMessages(newData);
+            }
         });
+
+        contract.on("MessageDeleted", (index) => {
+            console.log("MESSAGE DELETED");
+           let intIndex = parseInt(index);
+
+           let tempData = displayedMessages.splice(intIndex,1);
+           setAllMessages(tempData);
+        });
+    }
+
+    const setAllMessages = (data) => {
+        let temp = [...data];
+        setDisplayedMessages(temp);
+        allMessages.current = data;
+    }
+
+    const setLoadingMessages = (status) => {
+        setIsLoading(status);
+        loadingMessage.current = status;
     }
 
 
@@ -152,16 +168,16 @@ export default () => {
         <>
             {account && hasWallet && (
                 <div>
-                    <div ref={messageBox} id="messageBox" className="messageBox">
-                        {!loadingMessage && allMessages.map((message) => (
+                    <div id="messageBox" className="messageBox">
+                        {!isLoading && displayedMessages.map((message) => (
                             <div key={message.index} id="displayedMessage">
-                                ({parseInt(message.index)}) {message.from}:  {utils.parseBytes32String(message.message)}
+                                {message.from}:  {utils.parseBytes32String(message.message)}
                                 {isOwner && (
                                     <button onClick={() => deleteMessage(message.index)}>DEL</button>
                                 )}
                             </div>
                         ))}
-                        {loadingMessage && (
+                        {isLoading && (
                             <p>loading...</p>
                         )}
                     </div>
@@ -191,6 +207,8 @@ export default () => {
             {!hasWallet && (
                 <p>You must have Metamask wallet</p>
             )}
+
+            {displayedMessages.length}
         </>
     )
 }

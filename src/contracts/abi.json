@@ -30,6 +30,19 @@
         "type": "event"
     },
     {
+        "anonymous": false,
+        "inputs": [
+            {
+                "indexed": false,
+                "internalType": "uint256",
+                "name": "index",
+                "type": "uint256"
+            }
+        ],
+        "name": "MessageDeleted",
+        "type": "event"
+    },
+    {
         "inputs": [
             {
                 "internalType": "bytes32",
